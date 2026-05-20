@@ -63,7 +63,7 @@ export function UserTodosSection({ userId }: UserTodosSectionProps) {
   const completed = todos.filter((todo) => todo.completed).length;
 
   return (
-    <section>
+    <section className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
       <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
         Todos ({completed}/{todos.length} completed)
       </h2>

@@ -1,3 +1,5 @@
+import { buttonSecondaryClassName } from "@/lib/styles";
+
 type UsersPaginationProps = {
   page: number;
   totalPages: number;
@@ -15,25 +17,25 @@ export function UsersPagination({
 
   return (
     <nav
-      className="flex items-center justify-between gap-4"
+      className="flex flex-col items-center justify-between gap-3 rounded-xl border border-zinc-200 bg-white px-4 py-3 shadow-sm sm:flex-row dark:border-zinc-800 dark:bg-zinc-950"
       aria-label="Users pagination"
     >
       <button
         type="button"
         disabled={page <= 1}
         onClick={() => onPageChange(page - 1)}
-        className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm font-medium text-zinc-700 enabled:hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-zinc-700 dark:text-zinc-300 dark:enabled:hover:bg-zinc-900"
+        className={`w-full sm:w-auto disabled:cursor-not-allowed disabled:opacity-40 ${buttonSecondaryClassName}`}
       >
         Previous
       </button>
-      <p className="text-sm text-zinc-600 dark:text-zinc-400">
+      <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
         Page {page} of {totalPages}
       </p>
       <button
         type="button"
         disabled={page >= totalPages}
         onClick={() => onPageChange(page + 1)}
-        className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm font-medium text-zinc-700 enabled:hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-zinc-700 dark:text-zinc-300 dark:enabled:hover:bg-zinc-900"
+        className={`w-full sm:w-auto disabled:cursor-not-allowed disabled:opacity-40 ${buttonSecondaryClassName}`}
       >
         Next
       </button>

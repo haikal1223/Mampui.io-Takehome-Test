@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import { PageShell } from "@/components/ui/PageShell";
 import { UserDetailView } from "@/components/users/UserDetailView";
 import { fetchUser, UserNotFoundError } from "@/lib/api/jsonplaceholder";
 import { parseReturnTo, parseUserId } from "@/lib/users/parse-user-id";
@@ -46,8 +47,8 @@ export default async function UserPage({ params, searchParams }: UserPageProps) 
   const backHref = parseReturnTo(returnTo);
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 px-6 py-12">
+    <PageShell maxWidth="md">
       <UserDetailView userId={userId} backHref={backHref} />
-    </div>
+    </PageShell>
   );
 }

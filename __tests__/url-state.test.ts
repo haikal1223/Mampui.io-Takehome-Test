@@ -6,7 +6,13 @@ import {
 describe("url-state", () => {
   it("buildUsersListQueryString includes a single leading question mark", () => {
     expect(
-      buildUsersListQueryString({ q: "chelsey", sort: "name", order: "asc" }),
+      buildUsersListQueryString({
+        q: "chelsey",
+        sort: "name",
+        order: "asc",
+        filter: "all",
+        page: 1,
+      }),
     ).toBe("?q=chelsey");
   });
 
@@ -16,7 +22,9 @@ describe("url-state", () => {
         q: "chelsey",
         sort: "name",
         order: "asc",
+        filter: "pending",
+        page: 2,
       }),
-    ).toBe("/users?q=chelsey");
+    ).toBe("/users?q=chelsey&filter=pending&page=2");
   });
 });

@@ -1,4 +1,4 @@
-import type { User } from "./types";
+import type { Post, Todo, User } from "./types";
 
 export const API_BASE = "https://jsonplaceholder.typicode.com";
 
@@ -39,4 +39,36 @@ export async function fetchUser(id: number): Promise<User> {
   }
 
   return data as User;
+}
+
+async function fetchJson<T>(url: string, label: string): Promise<T> {
+  const response = await fetch(url, { next: { revalidate: 60 } });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch ${label} (${response.status})`);
+  }
+
+  return response.json() as Promise<T>;
+}
+
+export function fetchPosts() {
+  return fetchJson<Post[]>(`${API_BASE}/posts`, "posts");
+}
+
+export function fetchTodos() {
+  return fetchJson<Todo[]>(`${API_BASE}/todos`, "todos");
+}
+
+export function fetchPostsByUser(userId: number) {
+  return fetchJson<Post[]>(
+    `${API_BASE}/posts?userId=${userId}`,
+    `posts for user ${userId}`,
+  );
+}
+
+export function fetchTodosByUser(userId: number) {
+  return fetchJson<Todo[]>(
+    `${API_BASE}/todos?userId=${userId}`,
+    `todos for user ${userId}`,
+  );
 }

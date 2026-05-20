@@ -4,12 +4,16 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
 
 import { UserCardList } from "@/components/users/UserCardList";
+import { UsersPagination } from "@/components/users/UsersPagination";
 import { UsersTable } from "@/components/users/UsersTable";
-import { useUsers } from "@/hooks/useUsers";
+import { useUsersWithActivity } from "@/hooks/useUsersWithActivity";
 import { applyUsersListFilters } from "@/lib/users/filter-sort";
+import { paginate } from "@/lib/users/pagination";
 import {
   buildReturnTo,
   parseUsersListParams,
+  type ActivityFilter,
+  type SortField,
   type SortOrder,
   type UsersListSearchParams,
 } from "@/lib/users/url-state";
@@ -69,7 +73,7 @@ export function UsersListWorkspace() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: users, isPending, isError, error, refetch, isFetching } =
-    useUsers();
+    useUsersWithActivity();
 
   const listParams = useMemo(
     () => parseUsersListParams(searchParams),
@@ -80,7 +84,13 @@ export function UsersListWorkspace() {
 
   const updateParams = useCallback(
     (patch: Partial<UsersListSearchParams>) => {
-      const next: UsersListSearchParams = { ...listParams, ...patch };
+      const shouldResetPage =
+        patch.page === undefined && Object.keys(patch).length > 0;
+      const next: UsersListSearchParams = {
+        ...listParams,
+        ...patch,
+        page: patch.page ?? (shouldResetPage ? 1 : listParams.page),
+      };
       router.replace(buildReturnTo(pathname, next), { scroll: false });
     },
     [listParams, pathname, router],
@@ -93,9 +103,32 @@ export function UsersListWorkspace() {
     return applyUsersListFilters(users, listParams);
   }, [users, listParams]);
 
+  const pagination = useMemo(
+    () => paginate(filteredUsers, listParams.page),
+    [filteredUsers, listParams.page],
+  );
+
+  const hasActiveFilters =
+    listParams.q.trim() !== "" ||
+    listParams.filter !== "all" ||
+    listParams.sort !== "name" ||
+    listParams.order !== "asc";
+
+  const handleSortFieldChange = (sort: SortField) => {
+    updateParams({
+      sort,
+      order: sort === "pending" ? "desc" : listParams.order,
+      page: 1,
+    });
+  };
+
   const toggleSortOrder = () => {
     const nextOrder: SortOrder = listParams.order === "asc" ? "desc" : "asc";
-    updateParams({ order: nextOrder });
+    updateParams({ order: nextOrder, page: 1 });
+  };
+
+  const clearFilters = () => {
+    router.replace(pathname, { scroll: false });
   };
 
   if (isPending) {
@@ -117,7 +150,7 @@ export function UsersListWorkspace() {
         <button
           type="button"
           onClick={() => refetch()}
-          className="mt-4 rounded-md bg-red-800 px-4 py-2 text-sm font-medium text-white hover:bg-red-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-800 dark:bg-red-700 dark:hover:bg-red-600"
+          className="mt-4 rounded-md bg-red-800 px-4 py-2 text-sm font-medium text-white hover:bg-red-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-800 dark:bg-red-700 dark:hover:bg-red-600"
         >
           Try again
         </button>
@@ -127,21 +160,64 @@ export function UsersListWorkspace() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <div className="flex flex-col gap-4">
         <UserSearchForm
           key={listParams.q}
           query={listParams.q}
-          onSearch={(q) => updateParams({ q })}
+          onSearch={(q) => updateParams({ q, page: 1 })}
         />
 
-        <button
-          type="button"
-          onClick={toggleSortOrder}
-          className="shrink-0 rounded-md border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-900 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-900 dark:focus-visible:outline-zinc-50"
-          aria-label={`Sort by name ${listParams.order === "asc" ? "descending" : "ascending"}`}
-        >
-          Sort by name ({listParams.order === "asc" ? "A→Z" : "Z→A"})
-        </button>
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+          <label className="flex flex-col gap-1 text-sm">
+            <span className="font-medium text-zinc-700 dark:text-zinc-300">
+              Filter
+            </span>
+            <select
+              value={listParams.filter}
+              onChange={(event) =>
+                updateParams({
+                  filter: event.target.value as ActivityFilter,
+                  page: 1,
+                })
+              }
+              className="rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
+            >
+              <option value="all">All users</option>
+              <option value="pending">Has pending todos</option>
+              <option value="no-completed">No completed todos</option>
+            </select>
+          </label>
+
+          <label className="flex flex-col gap-1 text-sm">
+            <span className="font-medium text-zinc-700 dark:text-zinc-300">
+              Sort by
+            </span>
+            <select
+              value={listParams.sort}
+              onChange={(event) =>
+                handleSortFieldChange(event.target.value as SortField)
+              }
+              className="rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
+            >
+              <option value="name">Name</option>
+              <option value="pending">Most pending todos</option>
+            </select>
+          </label>
+
+          <button
+            type="button"
+            onClick={toggleSortOrder}
+            className="self-end rounded-md border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-900 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-900 sm:mb-0 sm:mt-6"
+          >
+            {listParams.sort === "pending"
+              ? listParams.order === "desc"
+                ? "Pending: high → low"
+                : "Pending: low → high"
+              : listParams.order === "asc"
+                ? "Name: A→Z"
+                : "Name: Z→A"}
+          </button>
+        </div>
       </div>
 
       {isFetching && !isPending ? (
@@ -151,16 +227,33 @@ export function UsersListWorkspace() {
       ) : null}
 
       {filteredUsers.length === 0 ? (
-        <p className="rounded-lg border border-dashed border-zinc-300 p-8 text-center text-zinc-600 dark:border-zinc-700 dark:text-zinc-400">
-          No users match your search.
-        </p>
+        <div className="rounded-lg border border-dashed border-zinc-300 p-8 text-center dark:border-zinc-700">
+          <p className="text-zinc-600 dark:text-zinc-400">
+            No users match your filters.
+          </p>
+          {hasActiveFilters ? (
+            <button
+              type="button"
+              onClick={clearFilters}
+              className="mt-4 text-sm font-medium text-zinc-900 underline underline-offset-2 dark:text-zinc-50"
+            >
+              Clear all filters
+            </button>
+          ) : null}
+        </div>
       ) : (
         <>
-          <UsersTable users={filteredUsers} returnTo={returnTo} />
-          <UserCardList users={filteredUsers} returnTo={returnTo} />
+          <UsersTable users={pagination.items} returnTo={returnTo} />
+          <UserCardList users={pagination.items} returnTo={returnTo} />
           <p className="text-sm text-zinc-500 dark:text-zinc-400">
-            Showing {filteredUsers.length} of {users?.length ?? 0} users
+            Showing {pagination.items.length} of {pagination.totalItems} matching
+            users ({users?.length ?? 0} total)
           </p>
+          <UsersPagination
+            page={pagination.page}
+            totalPages={pagination.totalPages}
+            onPageChange={(page) => updateParams({ page })}
+          />
         </>
       )}
     </div>

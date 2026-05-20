@@ -3,7 +3,9 @@
 import Link from "next/link";
 
 import { UserDetailCard } from "@/components/users/UserDetailCard";
+import { UserPostsSection } from "@/components/users/UserPostsSection";
 import { UserDetailSkeleton } from "@/components/users/UserDetailSkeleton";
+import { UserTodosSection } from "@/components/users/UserTodosSection";
 import { useUser } from "@/hooks/useUser";
 import { UserNotFoundError } from "@/lib/api/jsonplaceholder";
 
@@ -63,6 +65,10 @@ export function UserDetailView({ userId, backHref }: UserDetailViewProps) {
         ← Back to list
       </Link>
       <UserDetailCard user={user} />
+      <div className="grid gap-8 border-t border-zinc-200 pt-8 dark:border-zinc-800">
+        <UserPostsSection userId={userId} />
+        <UserTodosSection userId={userId} />
+      </div>
     </div>
   );
 }

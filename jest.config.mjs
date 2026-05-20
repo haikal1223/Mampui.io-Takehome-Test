@@ -4,7 +4,11 @@ const createJestConfig = nextJest({ dir: "./" });
 
 /** @type {import('jest').Config} */
 const config = {
-  setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
+  setupFiles: ["<rootDir>/jest.polyfills.cjs"],
+  setupFilesAfterEnv: [
+    "<rootDir>/test/mocks/next-navigation.ts",
+    "<rootDir>/jest.setup.ts",
+  ],
   testEnvironment: "jest-environment-jsdom",
   testPathIgnorePatterns: ["<rootDir>/.next/", "<rootDir>/node_modules/"],
   collectCoverageFrom: [
@@ -16,4 +20,15 @@ const config = {
   ],
 };
 
-export default createJestConfig(config);
+export default async function jestConfig() {
+  const nextConfig = await createJestConfig(config)();
+  return {
+    ...nextConfig,
+    transformIgnorePatterns: [
+      "/node_modules/(?!(msw|@mswjs|rettime)/)",
+      ...(nextConfig.transformIgnorePatterns ?? []).filter(
+        (pattern) => !String(pattern).includes("msw"),
+      ),
+    ],
+  };
+}

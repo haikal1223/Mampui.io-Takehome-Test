@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Mampu Take-Home — Users",
+  title: "Mampu.io Take-Home — Users",
   description: "MID Frontend take-home test — users workspace",
 };
 

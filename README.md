@@ -1,36 +1,88 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Mampu.io Frontend Take-Home Test
 
-## Getting Started
+A Next.js users workspace that fetches data from [JSONPlaceholder](https://jsonplaceholder.typicode.com), built for the MID Frontend take-home (v2.0).
 
-First, run the development server:
+## Features
+
+- **Users list** (`/users`) — search, activity filters, sort, pagination, responsive table/cards
+- **User details** (`/users/[id]`) — profile, posts, todos, SEO metadata, error boundaries
+- **React Query** for client data fetching with 60s cache (`staleTime`)
+- **Jest + React Testing Library + MSW** for unit and integration tests
+
+## Prerequisites
+
+- Node.js 20+ recommended (project tested on Node 21)
+- npm
+
+## Setup
+
+```bash
+npm install
+```
+
+## Development
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) and navigate to **Users**.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Command              | Description                       |
+| -------------------- | --------------------------------- |
+| `npm run dev`        | Start development server          |
+| `npm run build`      | Production build                  |
+| `npm run start`      | Run production server             |
+| `npm test`           | Run test suite (Jest + RTL + MSW) |
+| `npm run test:watch` | Run tests in watch mode           |
+| `npm run lint`       | ESLint                            |
 
-## Learn More
+## Testing
 
-To learn more about Next.js, take a look at the following resources:
+Tests live in `__tests__/` and use:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **MSW handlers** — `test/msw/handlers.ts` for JSONPlaceholder routes (used for local/dev mocking; Jest suites use a fetch mock in `test/helpers/mock-fetch.ts` for jsdom compatibility)
+- **Fixtures** — `test/fixtures/`
+- **Navigation mock** — `test/mocks/next-navigation.ts` for URL state on the list page
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+npm test
+```
 
-## Deploy on Vercel
+### Test coverage highlights
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Users list: activity columns, search, filters, sort, loading, error, empty state
+- User details: profile, posts/todos, loading, error, invalid user id
+- API helpers and pure utilities (`activity`, `filter-sort`, `url-state`, `pagination`)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Project structure
+
+```
+app/                 # Next.js App Router pages
+components/          # UI and feature components
+hooks/               # React Query hooks
+lib/                 # API clients, filters, URL state
+test/                # MSW handlers, fixtures, test utilities
+__tests__/           # Jest test suites
+```
+
+## Branch workflow (suggested)
+
+| Branch                   | Task                                  |
+| ------------------------ | ------------------------------------- |
+| `task-1/setup`           | React Query, Jest, tooling            |
+| `task2/users-list`       | Users list, search, sort              |
+| `task-3/user-details`    | User detail route                     |
+| `task-4/user-operations` | Activity signals, filters, pagination |
+| `task-5/styling-ux`      | Responsive polish, skeletons, a11y    |
+| `task-6/testing`         | Full test suite + README              |
+
+## Tech stack
+
+- Next.js 16 (App Router)
+- TypeScript
+- TanStack React Query
+- Tailwind CSS v4
+- Jest, React Testing Library, MSW

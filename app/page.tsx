@@ -6,7 +6,7 @@ import { buttonPrimaryClassName } from "@/lib/styles";
 export default function Home() {
   return (
     <PageShell
-      title="Mampu Frontend Take-Home"
+      title="Mampu.io Frontend Take-Home"
       description="A users workspace built with Next.js, React Query, and JSONPlaceholder. Browse users, inspect activity, and explore posts and todos."
     >
       <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">

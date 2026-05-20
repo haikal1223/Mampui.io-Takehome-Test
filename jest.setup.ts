@@ -1,3 +1,7 @@
 import "@testing-library/jest-dom";
+import "@/test/setup-match-media";
 
-// MSW server lives in test/msw/ — wire up per suite in Task 6 tests.
+if (typeof globalThis.fetch === "undefined") {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports -- Jest setup polyfill
+  require("whatwg-fetch");
+}

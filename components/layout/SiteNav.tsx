@@ -30,7 +30,7 @@ export function SiteNav() {
           href="/"
           className="text-sm font-semibold tracking-tight text-zinc-900 dark:text-zinc-50"
         >
-          Mampu Take-Home
+          Mampu.io Take-Home
         </Link>
         <ul className="flex items-center gap-1">
           {links.map((link) => {

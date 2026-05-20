@@ -1,13 +1,15 @@
-import { QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, type RenderOptions } from "@testing-library/react";
 import type { ReactElement, ReactNode } from "react";
 
-import { makeQueryClient } from "@/lib/api/query-client";
-
-function createTestQueryClient() {
-  const client = makeQueryClient();
-  client.setDefaultOptions({
-    queries: { retry: false },
+export function createTestQueryClient() {
+  const client = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+        gcTime: 0,
+      },
+    },
   });
   return client;
 }
@@ -24,4 +26,8 @@ export function renderWithProviders(
   options?: Omit<RenderOptions, "wrapper">,
 ) {
   return render(ui, { wrapper: Providers, ...options });
+}
+
+export async function waitForQuerySettled() {
+  await new Promise((resolve) => setTimeout(resolve, 0));
 }

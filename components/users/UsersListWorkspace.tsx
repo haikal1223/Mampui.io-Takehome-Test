@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { UserCardList } from "@/components/users/UserCardList";
 import { UsersTable } from "@/components/users/UsersTable";
@@ -13,6 +13,43 @@ import {
   type SortOrder,
   type UsersListSearchParams,
 } from "@/lib/users/url-state";
+
+type UserSearchFormProps = {
+  query: string;
+  onSearch: (query: string) => void;
+};
+
+function UserSearchForm({ query, onSearch }: UserSearchFormProps) {
+  const [searchInput, setSearchInput] = useState(query);
+
+  return (
+    <form
+      onSubmit={(event) => {
+        event.preventDefault();
+        onSearch(searchInput);
+      }}
+      className="flex flex-1 gap-2"
+    >
+      <label htmlFor="user-search" className="sr-only">
+        Search users by name or email
+      </label>
+      <input
+        id="user-search"
+        type="search"
+        value={searchInput}
+        onChange={(event) => setSearchInput(event.target.value)}
+        placeholder="Search by name or email…"
+        className="w-full max-w-md rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50 dark:placeholder:text-zinc-500 dark:focus-visible:outline-zinc-50"
+      />
+      <button
+        type="submit"
+        className="shrink-0 rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-900 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200 dark:focus-visible:outline-zinc-100"
+      >
+        Search
+      </button>
+    </form>
+  );
+}
 
 export function UsersListSkeleton() {
   return (
@@ -39,12 +76,6 @@ export function UsersListWorkspace() {
     [searchParams],
   );
 
-  const [searchInput, setSearchInput] = useState(listParams.q);
-
-  useEffect(() => {
-    setSearchInput(listParams.q);
-  }, [listParams.q]);
-
   const returnTo = buildReturnTo(pathname, listParams);
 
   const updateParams = useCallback(
@@ -61,11 +92,6 @@ export function UsersListWorkspace() {
     }
     return applyUsersListFilters(users, listParams);
   }, [users, listParams]);
-
-  const handleSearchSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    updateParams({ q: searchInput });
-  };
 
   const toggleSortOrder = () => {
     const nextOrder: SortOrder = listParams.order === "asc" ? "desc" : "asc";
@@ -102,25 +128,11 @@ export function UsersListWorkspace() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <form onSubmit={handleSearchSubmit} className="flex flex-1 gap-2">
-          <label htmlFor="user-search" className="sr-only">
-            Search users by name or email
-          </label>
-          <input
-            id="user-search"
-            type="search"
-            value={searchInput}
-            onChange={(event) => setSearchInput(event.target.value)}
-            placeholder="Search by name or email…"
-            className="w-full max-w-md rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50 dark:placeholder:text-zinc-500 dark:focus-visible:outline-zinc-50"
-          />
-          <button
-            type="submit"
-            className="shrink-0 rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-900 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200 dark:focus-visible:outline-zinc-100"
-          >
-            Search
-          </button>
-        </form>
+        <UserSearchForm
+          key={listParams.q}
+          query={listParams.q}
+          onSearch={(q) => updateParams({ q })}
+        />
 
         <button
           type="button"

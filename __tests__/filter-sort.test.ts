@@ -47,7 +47,10 @@ describe("filter-sort", () => {
   });
 
   it("sorts users by name", () => {
-    expect(sortUsers(users, "asc").map((u) => u.name)).toEqual(["Aaron", "Zara"]);
+    expect(sortUsers(users, "asc").map((u) => u.name)).toEqual([
+      "Aaron",
+      "Zara",
+    ]);
     expect(sortUsers(users, "desc").map((u) => u.name)).toEqual([
       "Zara",
       "Aaron",

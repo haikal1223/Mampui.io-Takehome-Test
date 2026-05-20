@@ -2,6 +2,13 @@ import type { User } from "./types";
 
 export const API_BASE = "https://jsonplaceholder.typicode.com";
 
+export class UserNotFoundError extends Error {
+  constructor() {
+    super("User not found");
+    this.name = "UserNotFoundError";
+  }
+}
+
 export async function fetchUsers(): Promise<User[]> {
   const response = await fetch(`${API_BASE}/users`);
 
@@ -13,17 +20,23 @@ export async function fetchUsers(): Promise<User[]> {
 }
 
 export async function fetchUser(id: number): Promise<User> {
-  const response = await fetch(`${API_BASE}/users/${id}`);
+  const response = await fetch(`${API_BASE}/users/${id}`, {
+    next: { revalidate: 60 },
+  });
+
+  if (response.status === 404) {
+    throw new UserNotFoundError();
+  }
 
   if (!response.ok) {
     throw new Error(`Failed to fetch user (${response.status})`);
   }
 
-  const data = (await response.json()) as User;
+  const data = (await response.json()) as Partial<User>;
 
   if (!data?.id) {
-    throw new Error("User not found");
+    throw new UserNotFoundError();
   }
 
-  return data;
+  return data as User;
 }
